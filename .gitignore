@@ -1,2 +1,4 @@
 app/saved_models/u2net/
 app/saved_models/u2netp/
+.ipynb_checkpoints/
+doc_imgs/Photos/
