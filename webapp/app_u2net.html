@@ -1,0 +1,177 @@
+<!doctype html>
+<html>
+  <head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible, Content-Security-Policy" content="IE=edge, upgrade-insecure-requests">
+  <!-- <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    /* https://stackoverflow.com/a/1964871 */
+    /* http://ajaxload.info/ spinner examples*/
+    /* Start by setting display:none to make this hidden.
+      Then we position it in relation to the viewport window
+      with position:fixed. Width, height, top and left speak
+      for themselves. Background we set to 80% white with
+      our animation centered, and no-repeating */
+    .spinner {
+        display:    none;
+        position:   fixed;
+        z-index:    1000;
+        top:        0;
+        left:       0;
+        height:     100%;
+        width:      100%;
+        background: rgba( 255, 255, 255, .8 ) 
+                    url('ajax-loader.gif') 
+                    50% 50% 
+                    no-repeat;
+    }
+    /* When the body has the loading class, we turn
+      the scrollbar off with overflow:hidden */
+    body.loading .spinner {
+        overflow: hidden;   
+    }
+    /* Anytime the body has the loading class, our
+      spinner element will be visible */
+    body.loading .spinner {
+        display: block;
+    }
+  </style>
+
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light static-top" style="background-color: #d6f2ff;">
+      <div class="container">
+          <!-- <a class="navbar-brand" href="index.html">
+          <img src="./static/atamai.png" width="50" height="50" alt="">
+        </a> -->
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="app_u2net_EC2.html">U2NET</a>
+          <!-- </li>
+          <li class="nav-item">
+            <a class="nav-link" href="app_textcleaner.html">GPU<span class="sr-only">(current)</span></a>
+          </li> -->
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid p-5">
+      
+      <form id="formElem">
+        
+        <div class="row justify-content-around">
+          <div class="col mb-3">
+            <h1>U2NET</h1>
+            <hr><hr>
+
+            <!-- <input type="number" step="0.1"  class="thresh" name="thresh" id="thresh" placeholder="confidence score" min="0" max="1"> -->
+
+            <input type="file" name="imguploader" id="imguploader" class="form-control-file" accept="image/*" onchange="displayimage();" required>
+            <br>
+            <input class="btn btn-warning" type="submit" value="U2net">
+            <hr>
+            <div id="dummy"></div>
+          </div>
+        </div>
+        
+        <div class="row justify-content-around">
+          <div class="col">
+            <div id="decodedresult"></div>
+          </div>
+        </div>
+      
+      </form>
+      <div class="spinner"><!-- Place at bottom of page --></div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script>
+
+      $body = $("body");
+
+      // https://stackoverflow.com/a/63255139/7358899
+      function displayimage() {
+        var selectedfile = document.getElementById("imguploader").files;
+        if (selectedfile.length > 0) {
+          var imageFile = selectedfile[0];
+          var fileReader = new FileReader();
+          fileReader.onload = function(fileLoadedEvent) {
+          //   var base64data = fileLoadedEvent.target.result.split(',')[1];
+            var srcData = fileLoadedEvent.target.result;
+            var newImage = document.createElement('img');
+            newImage.src = srcData;
+            newImage.className = "img-fluid";
+            document.getElementById("dummy").innerHTML = newImage.outerHTML;
+          }
+          fileReader.readAsDataURL(imageFile);
+        }
+      }
+
+      function getBase64(file, onLoadCallback) {
+          return new Promise(function(resolve, reject) {
+              var reader = new FileReader();
+              reader.onload = function() { resolve(reader.result); };
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+          });
+      }
+
+
+      formElem.onsubmit = async (e) => {
+        e.preventDefault();
+        $body.addClass("loading");
+        var form = document.querySelector("#formElem");
+
+        var selectedfile = form.querySelector('#imguploader').files[0];
+        var promise = getBase64(selectedfile);
+        promise.then(function(image64) {
+            // console.log(image64);
+        });
+        let image64 = await promise
+
+        data = {
+                  // min_thresh : parseFloat(form.querySelector('#thresh').value),
+                  model_name : "u2netp",
+                  body64 : image64.split(',')[1],
+                }
+        console.log(JSON.stringify(data));
+<<<<<<< HEAD:webapp/app_u2net.html
+        let response = await fetch('https://u2net-occqj5qb5a-ey.a.run.app', { //http://0.0.0.0:10002
+=======
+        let response = await fetch('https://14bd-93-158-31-74.ngrok.io/', { //https://u2net-occqj5qb5a-ey.a.run.app/
+>>>>>>> 6e29dc1e3ba644910aab807357a7adde055dcece:webapp/app_u2net_EC2.html
+                method: 'POST', // or 'PUT'
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+        })
+
+        let text = await response.text(); // read response body as text
+        let results = JSON.parse(text);
+        // let body_result = JSON.parse(results["body"]);
+        console.log(results["body64"])
+        
+        let base64=results["body64"]
+        let buffer=Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+        let blob=new Blob([buffer], { type: "image/gif" });
+        let url=URL.createObjectURL(blob);
+        let img=document.createElement("img");
+        img.src=url;
+        img.className = "img-fluid";
+        $body.removeClass("loading");
+        document.getElementById("decodedresult").innerHTML = img.outerHTML;
+      };
+    </script>
+  </body>
+</html>
