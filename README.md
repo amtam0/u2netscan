@@ -44,7 +44,11 @@ Tested one document on smartphone camera with different angles
 ### Limits and Areas for improvements
 - Speed: It takes 7 to 10 seconds to process one image (serverless Cloud Run)
     With Gpu we can save 2 to 3 seconds (U^2-Net is 3 times faster)
-- Textcleaner is slow but works better on image cleaning, but needs some manual fine-tuning
+- Textcleaner is slow(speed) but works good on image cleaning, but needs some manual fine-tuning
+    a faster alternative can be used (Ex. Opencv)
+- Taking pictures from angled positions is not supported, 
+    perspective transformation can be used but may deteriorate text quality
+- U^2-Net limitations : the document should be centered in a contrasting color background (white background will not work)
 
 ### References
 - U^2-Net https://github.com/xuebinqin/U-2-Net.git
